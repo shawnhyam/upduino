@@ -11,7 +11,7 @@ waveform.asc: waveform.json ../common/upduino.pcf
 	nextpnr-ice40 --up5k --package sg48 --json waveform.json --pcf ../common/upduino.pcf --asc waveform.asc   # run place and route
 
 waveform.json: waveform.v
-	yosys -q -p "synth_ice40 -json waveform.json" waveform.v
+	yosys -q -p "synth_ice40 -json waveform.json" waveform.v pll.v
 
 .PHONY: flash
 flash:
