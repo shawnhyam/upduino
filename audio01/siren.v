@@ -27,7 +27,8 @@ module rgb_blink (
   output wire led_red  , // Red
   output wire led_blue , // Blue
   output wire led_green,  // Green
-  output wire gpio_28
+  output wire gpio_28,
+  input wire gpio_20
 );
 
   wire        int_osc            ;
@@ -38,8 +39,8 @@ module rgb_blink (
 //                       Internal Oscillator                                --
 //                                                                          --
 //----------------------------------------------------------------------------
-  SB_HFOSC u_SB_HFOSC (.CLKHFPU(1'b1), .CLKHFEN(1'b1), .CLKHF(int_osc));
-
+  //SB_HFOSC u_SB_HFOSC (.CLKHFPU(1'b1), .CLKHFEN(1'b1), .CLKHF(int_osc));
+  assign int_osc = gpio_20;
 
   music music(int_osc, gpio_28);
 
