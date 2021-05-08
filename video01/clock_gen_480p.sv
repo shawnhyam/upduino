@@ -22,19 +22,19 @@ module clock_gen_480p #(
 );
 
     logic locked;
-    SB_PLL40_PAD #(
-        .FEEDBACK_PATH(FEEDBACK_PATH),
-        .DIVR(DIVR),
-        .DIVF(DIVF),
-        .DIVQ(DIVQ),
-        .FILTER_RANGE(FILTER_RANGE)
-    ) SB_PLL40_PAD_inst (
-        .PACKAGEPIN(clk),
-        .PLLOUTGLOBAL(clk_pix),  // use global clock network
-        .RESETB(rst),
-        .BYPASS(1'b0),
-        .LOCK(locked)
-    );
+    SB_PLL40_CORE #(
+		.FEEDBACK_PATH(FEEDBACK_PATH),
+		.DIVR(DIVR),	           	// DIVR =  0
+		.DIVF(DIVF),	            // DIVF = 66
+		.DIVQ(DIVQ),		        // DIVQ =  5
+		.FILTER_RANGE(FILTER_RANGE)	// FILTER_RANGE = 1
+	) uut (
+		.LOCK(locked),
+		.RESETB(rst),
+		.BYPASS(1'b0),
+		.REFERENCECLK(clk),
+		.PLLOUTCORE(clk_pix)
+	);
 
     // ensure clock lock is synced with pixel clock
     logic locked_sync_0;

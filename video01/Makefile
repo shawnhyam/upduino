@@ -8,7 +8,7 @@ PCF = upduino.pcf
 #PATH_LIB = ../../../lib
 #ADD_SRC = ${PATH_LIB}/clock/ice40/clock_gen_480p.sv
 #ADD_SRC += ../simple_display_timings_480p.sv
-ADD_SRC = clock_gen_480p.sv
+ADD_SRC = clock_gen_480p.sv simple_display_timings_480p.sv
 
 #top_bounce: top_bounce.rpt top_bounce.bin
 #top_beam: top_beam.rpt top_beam.bin
@@ -27,9 +27,12 @@ video01: video01.rpt video01.bin
 %.bin: %.asc
 	icepack $< $@
 
+prog:
+	iceprog -d i:0x0403:0x6014 video01.bin
+
 clean:
-	rm -f top*.json top*.asc top*.rpt top*.bin top*yosys.log
+	rm -f *.json *.asc *.rpt *.bin *yosys.log
 
 all: video01
 
-.PHONY: all clean
+.PHONY: all clean prog
