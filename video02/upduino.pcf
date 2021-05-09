@@ -1,0 +1,23 @@
+## Board Clock: 12 MHz
+set_frequency  clk_12m      12
+set_io -nowarn clk_12m      20
+
+## Buttons
+set_io -nowarn btn_rst      10
+
+## 12-bit VGA
+set_io -nowarn vga_hsync    12
+set_io -nowarn vga_vsync    21
+set_io -nowarn vga_r[0]     48
+set_io -nowarn vga_r[1]     44
+set_io -nowarn vga_r[2]     11
+set_io -nowarn vga_r[3]     13
+set_io -nowarn vga_g[0]     45
+set_io -nowarn vga_g[1]      4
+set_io -nowarn vga_g[2]      9
+set_io -nowarn vga_g[3]     19
+set_io -nowarn vga_b[0]     47
+set_io -nowarn vga_b[1]      3
+set_io -nowarn vga_b[2]      6
+set_io -nowarn vga_b[3]     18
+
