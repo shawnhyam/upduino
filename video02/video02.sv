@@ -1,11 +1,24 @@
+typedef logic [3:0] color_channel_t;
+
+typedef struct packed {
+    color_channel_t red;
+    color_channel_t green;
+    color_channel_t blue;
+} color_channels_t;
+
+typedef union packed {
+    color_channels_t channels;
+    logic [11:0] data;
+} color_t;
+
 module video02 (
-    input  wire logic clk_12m,     // 12 MHz clock
-    input  wire logic btn_rst,      // reset button (active low)
-    output      logic vga_hsync,    // horizontal sync
-    output      logic vga_vsync,    // vertical sync
-    output      logic [3:0] vga_r,  // 4-bit VGA red
-    output      logic [3:0] vga_g,  // 4-bit VGA green
-    output      logic [3:0] vga_b   // 4-bit VGA blue
+    input  logic clk_12m,     // 12 MHz clock
+    input  logic btn_rst,      // reset button (active low)
+    output logic vga_hsync,    // horizontal sync
+    output logic vga_vsync,    // vertical sync
+    output color_channel_t vga_r,  // 4-bit VGA red
+    output color_channel_t vga_g,  // 4-bit VGA green
+    output color_channel_t vga_b   // 4-bit VGA blue
     );
 
     // generate pixel clock
@@ -33,16 +46,66 @@ module video02 (
         .de
     );
 
+    // palette memory
+    block_ram #(
+        .addr_width(8),
+        .data_width(16),
+        .filename("palette.mem")
+    ) palette_mem (
+        .din(16'h0000),
+        .write_en(1'b0),
+        .waddr(8'h00),
+        .wclk(clk_pix),
+        .raddr(palette_idx),
+        .rclk(clk_pix),
+        .dout(color)
+    );
+
+    logic [7:0] palette_idx;
+    logic [15:0] color;
+
+    logic [15:0] pattern;
+    logic [10:0] pattern_addr;
+
+    // font memory
+    block_ram #(
+        .addr_width(11),
+        .data_width(16),
+        .hex(1'b0),
+        .filename("font_ST_8x16w.mem")
+    ) font_mem (
+        .din(16'h0000),
+        .write_en(1'b0),
+        .waddr(8'h00),
+        .wclk(clk_pix),
+        .raddr(pattern_addr),
+        .rclk(clk_pix),
+        .dout(pattern)
+    );
+
     // 32 x 32 pixel square
     logic q_draw;
     always_comb q_draw = (sx < 32 && sy < 32) ? 1 : 0;
+
+    always_comb
+        palette_idx = { sy[8:5], sx[8:5] };
+
+    logic [3:0] pattern_bit;
+    logic fg;
+
+    always_comb begin
+        pattern_bit = { sy[0], sx[2:0] };
+        pattern_addr = { 1'b0, sx[9:3], sy[3:1] };
+        fg = pattern[pattern_bit];
+    end
 
     // VGA output
     always_ff @(posedge clk_pix) begin
         vga_hsync <= hsync;
         vga_vsync <= vsync;
-        vga_r <= !de ? 4'h0 : (q_draw ? 4'hF : 4'h0);
-        vga_g <= !de ? 4'h0 : (q_draw ? 4'h8 : 4'h8);
-        vga_b <= !de ? 4'h0 : (q_draw ? 4'h0 : 4'hF);
+        //vga_r <= !de ? 4'h0 : (q_draw ? 4'hF : 4'h0);
+        vga_r <= !de ? 4'h0 : (fg ? color[14:11] : 4'h0);
+        vga_g <= !de ? 4'h0 : (fg ? color[9:6]: 4'h0);
+        vga_b <= !de ? 4'h0 : (fg ? color[4:1]: 4'h0);
     end
 endmodule

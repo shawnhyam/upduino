@@ -1,4 +1,6 @@
 *.asc
 *.bin
 *.json
+*.log
+*.rpt
 .DS_Store

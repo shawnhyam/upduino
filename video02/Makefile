@@ -8,14 +8,14 @@ PCF = upduino.pcf
 #PATH_LIB = ../../../lib
 #ADD_SRC = ${PATH_LIB}/clock/ice40/clock_gen_480p.sv
 #ADD_SRC += ../simple_display_timings_480p.sv
-ADD_SRC = clock_gen_480p.sv simple_display_timings_480p.sv
+ADD_SRC = clock_gen_480p.sv simple_display_timings_480p.sv block_ram.sv
 
 #top_bounce: top_bounce.rpt top_bounce.bin
 #top_beam: top_beam.rpt top_beam.bin
 #top_square: top_square.rpt top_square.bin
 video02: video02.rpt video02.bin
 
-%.json: %.sv $(ADD_SRC)
+%.json: %.sv $(ADD_SRC) palette.mem
 	yosys -ql $(subst .json,,$@)-yosys.log -p 'synth_ice40 -top $(subst .json,,$@) -json $@' $< $(ADD_SRC)
 
 %.asc: %.json
