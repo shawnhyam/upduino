@@ -1,3 +1,10 @@
+/*
+
+
+
+*/
+
+
 typedef logic [3:0] color_channel_t;
 
 typedef struct packed {
@@ -72,7 +79,7 @@ module video02 (
         .addr_width(11),
         .data_width(16),
         .hex(1'b0),
-        .filename("font_ST_8x16w.mem")
+        .filename("font_vga_8x16w.mem")
     ) font_mem (
         .din(16'h0000),
         .write_en(1'b0),
@@ -91,16 +98,18 @@ module video02 (
         palette_idx = { sy[8:5], sx[8:5] };
 
     logic [3:0] pattern_bit;
+    logic [3:0] next_pattern_bit;
     logic fg;
 
     always_comb begin
-        pattern_bit = { sy[0], sx[2:0] };
+        next_pattern_bit = { ~sy[0], ~sx[2:0] };
         pattern_addr = { 1'b0, sx[9:3], sy[3:1] };
         fg = pattern[pattern_bit];
     end
 
     // VGA output
     always_ff @(posedge clk_pix) begin
+        pattern_bit <= next_pattern_bit;
         vga_hsync <= hsync;
         vga_vsync <= vsync;
         //vga_r <= !de ? 4'h0 : (q_draw ? 4'hF : 4'h0);
