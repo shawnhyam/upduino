@@ -71,10 +71,36 @@ module video02 (
     logic [7:0] palette_idx;
     logic [15:0] color;
 
+    logic [7:0] tile;
+    logic [11:0] tile_addr;
+
+    always_comb
+        tile_addr = { sy[8:4], sx[9:3] };
+
+    // TODO need to run this only once per tile
+    // tile memory
+    block_ram #(
+        .addr_width(12),
+        .data_width(8),
+        .hex(1'b1),
+        .filename("vram.mem")
+    ) vram_mem (
+        .din(8'h00),
+        .write_en(1'b0),
+        .waddr(12'h000),
+        .wclk(clk_pix),
+        .raddr(tile_addr),
+        .rclk(clk_pix),
+        .dout(tile)
+    );
+
     logic [15:0] pattern;
     logic [10:0] pattern_addr;
 
-    // font memory
+    logic [3:0] y_offset;
+    logic [2:0] x_offset;
+
+   // font memory
     block_ram #(
         .addr_width(11),
         .data_width(16),
@@ -102,13 +128,16 @@ module video02 (
     logic fg;
 
     always_comb begin
-        next_pattern_bit = { ~sy[0], ~sx[2:0] };
-        pattern_addr = { 1'b0, sx[9:3], sy[3:1] };
+        next_pattern_bit = { ~y_offset[0], ~x_offset[2:0] };
+        pattern_addr = { tile, y_offset[3:1] };
+        //pattern_addr = { 1'b0, sx[9:3], sy[3:1] };
         fg = pattern[pattern_bit];
     end
 
     // VGA output
     always_ff @(posedge clk_pix) begin
+        y_offset <= sy[3:0];
+        x_offset <= sx[2:0];
         pattern_bit <= next_pattern_bit;
         vga_hsync <= hsync;
         vga_vsync <= vsync;
