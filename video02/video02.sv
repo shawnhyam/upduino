@@ -18,6 +18,11 @@ typedef union packed {
     logic [11:0] data;
 } color_t;
 
+typedef struct packed {
+    logic [7:0] fg_color_idx;
+    logic [7:0] tile_idx;
+} tile_t;
+
 module video02 (
     input  logic clk_12m,     // 12 MHz clock
     input  logic btn_rst,      // reset button (active low)
@@ -63,7 +68,7 @@ module video02 (
         .write_en(1'b0),
         .waddr(8'h00),
         .wclk(clk_pix),
-        .raddr(palette_idx),
+        .raddr(~tile.fg_color_idx),
         .rclk(clk_pix),
         .dout(color)
     );
@@ -71,7 +76,7 @@ module video02 (
     logic [7:0] palette_idx;
     logic [15:0] color;
 
-    logic [7:0] tile;
+    tile_t tile;
     logic [11:0] tile_addr;
 
     always_comb
@@ -81,7 +86,7 @@ module video02 (
     // tile memory
     block_ram #(
         .addr_width(12),
-        .data_width(8),
+        .data_width(16),
         .hex(1'b1),
         .filename("vram.mem")
     ) vram_mem (
@@ -129,7 +134,7 @@ module video02 (
 
     always_comb begin
         next_pattern_bit = { ~y_offset[0], ~x_offset[2:0] };
-        pattern_addr = { tile, y_offset[3:1] };
+        pattern_addr = { tile.tile_idx, y_offset[3:1] };
         //pattern_addr = { 1'b0, sx[9:3], sy[3:1] };
         fg = pattern[pattern_bit];
     end
